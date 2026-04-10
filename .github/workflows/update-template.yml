@@ -1,0 +1,46 @@
+name: Update Template
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.repository == 'alpic-ai/apps-sdk-template'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      # Wipe everything except .git, scaffold fresh, restore README and .github
+      - name: Generate fresh template
+        id: generate
+        run: |
+          find . -maxdepth 1 ! -name . ! -name .git -exec rm -rf {} +
+          npm create skybridge@latest .
+          git checkout HEAD -- README.md .github
+          VERSION=$(node -p "require('./package.json').dependencies.skybridge.match(/\d+\.\d+\.\d+/)[0]")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify server starts
+        run: |
+          npm start &
+          npx wait-on tcp:3000 --timeout 30000
+          npx @modelcontextprotocol/inspector --cli http://localhost:3000/mcp --transport http --method tools/list
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update template to skybridge v${{ steps.generate.outputs.version }}"
