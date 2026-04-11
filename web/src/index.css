@@ -321,17 +321,25 @@ body {
 	gap: 0.6rem;
 }
 
-.pass__logo {
+.pass__qr {
+	appearance: none;
+	border: none;
+	padding: 0.2rem;
+	background: #fff;
+	border-radius: 0.5rem;
+	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 2.35rem;
-	height: 2.35rem;
-	border-radius: 0.7rem;
-	background: rgba(255, 255, 255, 0.92);
-	color: #0a1334;
-	font-size: 1.3rem;
-	font-weight: 700;
+	box-shadow:
+		0 0 0 1px rgba(255, 255, 255, 0.3),
+		0 4px 12px -4px rgba(0, 0, 0, 0.4);
+	transition: transform 0.2s ease;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.pass__qr:hover {
+	transform: scale(1.05);
 }
 
 .pass__brand-name {
@@ -469,45 +477,6 @@ body {
 	font-weight: 700;
 	color: #7dd3fc;
 	text-shadow: 0 0 14px rgba(125, 211, 252, 0.4);
-}
-
-.pass__qr {
-	appearance: none;
-	border: none;
-	padding: 0;
-	background: transparent;
-	font: inherit;
-	color: inherit;
-	cursor: pointer;
-
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 0.45rem;
-	-webkit-tap-highlight-color: transparent;
-}
-
-.pass__qr-frame {
-	display: inline-flex;
-	padding: 0.45rem;
-	border-radius: 0.65rem;
-	background: #fff;
-	box-shadow:
-		0 0 0 1px rgba(255, 255, 255, 0.3),
-		0 8px 22px -8px rgba(0, 0, 0, 0.5);
-	transition: transform 0.2s ease;
-}
-
-.pass__qr:hover .pass__qr-frame {
-	transform: scale(1.03);
-}
-
-.pass__qr-caption {
-	font-size: 0.62rem;
-	text-transform: uppercase;
-	letter-spacing: 0.12em;
-	color: rgba(255, 255, 255, 0.65);
-	text-align: center;
 }
 
 .pass__perforation {

@@ -99,9 +99,21 @@ function SkiPassConfirmation() {
 				<div className="pass__content">
 					<div className="pass__head">
 						<div className="pass__brand">
-							<span className="pass__logo" aria-hidden>
-								⛰
-							</span>
+							<button
+								type="button"
+								className="pass__qr"
+								onClick={() => openExternal(QR_TARGET_URL)}
+								aria-label="Scan to learn more"
+							>
+								<QRCodeSVG
+									value={QR_TARGET_URL}
+									size={40}
+									bgColor="#ffffff"
+									fgColor="#0a1334"
+									level="M"
+									marginSize={1}
+								/>
+							</button>
 							<div>
 								<div className="pass__brand-name">Alpine School</div>
 								<div className="pass__brand-sub">Concierge Pass</div>
@@ -159,24 +171,6 @@ function SkiPassConfirmation() {
 							<div className="pass__price-label">Total</div>
 							<div className="pass__price-amount">{priceEur}€</div>
 						</div>
-						<button
-							type="button"
-							className="pass__qr"
-							onClick={() => openExternal(QR_TARGET_URL)}
-							aria-label="Scan to learn more"
-						>
-							<div className="pass__qr-frame">
-								<QRCodeSVG
-									value={QR_TARGET_URL}
-									size={108}
-									bgColor="#ffffff"
-									fgColor="#0a1334"
-									level="M"
-									marginSize={1}
-								/>
-							</div>
-							<div className="pass__qr-caption">Scan to learn more</div>
-						</button>
 					</div>
 				</div>
 
