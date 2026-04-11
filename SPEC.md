@@ -29,7 +29,8 @@ Powered by Skybridge + WaniWani SDK (conversational flow engine) + Alpic.
 1. Open-ended question gathers level, group size, date, time, goals in one message
 2. Conversational follow-up for anything missing (one or two at a time)
 3. Show lesson plans widget — user picks Private / Small Group / Family
-4. Show ski pass confirmation widget with booking reference, instructor, meeting point, and weather
+4. Show ski pass confirmation widget with booking reference, instructor, meeting point, weather, and a QR code
+5. User scans the QR with their phone — opens `https://waniwani.ai`
 
 ## Tools and Widgets
 
@@ -40,9 +41,9 @@ Powered by Skybridge + WaniWani SDK (conversational flow engine) + Alpic.
 - Behavior: clicking a card calls `useSendFollowUpMessage` with "I'd like the {plan name}" so the LLM continues the flow
 
 **Widget: `ski-pass-confirmation`**
-- Input: `{ level, groupSize, date, time, lessonPlan, instructor, meetingPoint, bookingRef, weather, goals }`
+- Input: `{ bookingRef, level, groupSize, date, time, lessonPlan, lessonTagline, durationMinutes, priceEur, instructor, instructorStyle, meetingPoint, weather, goals }`
 - Output: echoes the input plus a cheerful summary line
-- Views: single full-bleed ski pass card (inline). Pure CSS + inline SVG.
+- Views: single full-bleed ski pass card (inline). Pure CSS + inline SVG, plus a real QR code (`qrcode.react`) encoding a hardcoded `https://waniwani.ai` target. Tapping the QR calls `useOpenExternal` as a desktop fallback.
 
 ## Journey (server-side flow)
 
@@ -59,4 +60,4 @@ Nodes:
 - **Existing products**: none — demo only
 - **APIs**: none — all data mocked server-side
 - **Auth**: none
-- **Constraints**: inline display mode only. No external deps beyond what the template ships.
+- **Constraints**: inline display mode only. Adds `qrcode.react` for client-side QR rendering.
