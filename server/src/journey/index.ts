@@ -45,19 +45,17 @@ export const skiLessonsFlow = createFlow({
         })
     })
     .addNode("confirmation", async ({ state, showWidget }) => {
-        return showWidget({
-            id: "show_ski_lesson_confirmation",
-            title: "Ski Lesson Confirmation",
-            description: "Confirm the ski lesson booking.",
-        }, {
-            data: {
-                level: state.level,
-                date: state.date,
-                time: state.time,
-                notes: state.notes,
-            },
-            description: "The user has confirmed the ski lesson booking.",
-        })
+        return showWidget(
+            "show-ski-lesson-confirmation",
+            {
+                data: {
+                    level: state.level,
+                    date: state.date,
+                    time: state.time,
+                    notes: state.notes,
+                },
+                description: "The user has confirmed the ski lesson booking.",
+            })
     })
     .addEdge(START, "welcome")
     .addEdge("welcome", "date_and_time")
