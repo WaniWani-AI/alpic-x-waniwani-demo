@@ -1,8 +1,7 @@
-import { waniwani } from "@waniwani/sdk";
 import { withWaniwani } from "@waniwani/sdk/mcp";
+import "dotenv/config";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
-import "dotenv/config";
 import { skiLessonsFlow } from "./journey/index.js";
 
 const lessonPlanSchema = z.object({
@@ -106,7 +105,7 @@ const server = new McpServer(
 		skiLessonsFlow.handler,
 	);
 
-withWaniwani(server, { client: waniwani() });
+withWaniwani(server);
 
 server.run();
 
