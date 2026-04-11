@@ -1,65 +1,276 @@
 import { createFlow, END, START } from "@waniwani/sdk/mcp";
 import { z } from "zod";
 
+// ---------- Mocked "resort database" ----------
+
+const INSTRUCTORS = [
+  { name: "Léa Rochette", style: "French technique, 12 yrs in Chamonix" },
+  { name: "Marcus Keller", style: "Swiss freeride specialist, ex-national team" },
+  { name: "Elsa Lindqvist", style: "Scandinavian all-mountain coach" },
+  { name: "Tom Whitfield", style: "British patient beginner coach" },
+  { name: "Hiroki Tanaka", style: "Powder + carving, multilingual" },
+];
+
+const MEETING_POINTS = [
+  "Bottom of Bochard Gondola, Chamonix",
+  "Le Brévent Telecabine main entrance",
+  "Grands Montets ski school flag",
+  "Flégère base, meeting point Blue",
+];
+
+const WEATHER_FORECASTS = [
+  "Bluebird · -4°C · 20cm fresh snow",
+  "Partly cloudy · -2°C · packed powder",
+  "Light snowfall · -6°C · 10cm overnight",
+  "Sunny · 1°C · spring conditions",
+];
+
+// Deterministic pick so the same inputs always map to the same picks.
+function pick<T>(list: T[], seed: string): T {
+  const hash = seed.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  return list[hash % list.length]!;
+}
+
+function generateBookingRef(seed: string): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let hash = seed.split("").reduce((a, c) => a + c.charCodeAt(0) * 31, 7);
+  let ref = "";
+  for (let i = 0; i < 4; i++) {
+    ref += alphabet[hash % alphabet.length];
+    hash = Math.floor(hash / alphabet.length) + seed.charCodeAt(i % seed.length);
+  }
+  return `SKI-${ref}`;
+}
+
+// ---------- Lesson plan catalog ----------
+
+type LessonPlanId = "private" | "small_group" | "family";
+
+type LessonPlan = {
+  id: LessonPlanId;
+  name: string;
+  tagline: string;
+  durationMinutes: number;
+  priceEur: number;
+  perks: string[];
+};
+
+function buildPlans(groupSize: number, level: string): LessonPlan[] {
+  return [
+    {
+      id: "private",
+      name: "Private Masterclass",
+      tagline: "1-on-1 coaching, fully tailored",
+      durationMinutes: 180,
+      priceEur: 320,
+      perks: [
+        "Dedicated senior instructor",
+        "Video review of your runs",
+        "Flexible meeting point",
+      ],
+    },
+    {
+      id: "small_group",
+      name: "Small Group Workshop",
+      tagline: `Max 4 skiers · all ${level}`,
+      durationMinutes: 150,
+      priceEur: 145,
+      perks: [
+        "Grouped by level, not by age",
+        "Technique drills + guided runs",
+        "Après-ski hot chocolate",
+      ],
+    },
+    {
+      id: "family",
+      name: "Family Adventure",
+      tagline:
+        groupSize > 1
+          ? `Perfect for your group of ${groupSize}`
+          : "Kids + parents, one crew",
+      durationMinutes: 210,
+      priceEur: 280,
+      perks: [
+        "Mixed-ability friendly",
+        "Photo stop at the panoramic lookout",
+        "Kid-sized lunch included",
+      ],
+    },
+  ];
+}
+
+// ---------- Flow ----------
+
 export const skiLessonsFlow = createFlow({
-    id: "ski_lessons",
-    title: "Ski Lessons",
-    description:
-        "Book ski lessons for a user. Use when a user wants to book ski lessons.",
-    state: {
-        level: z.enum(["beginner", "intermediate", "advanced"]).describe("The user's ski level."),
-        date: z.enum(["today", "tomorrow", "next week", "next month", "next year"]).describe("The date the user wants to book the ski lessons."),
-        time: z.enum(["morning", "afternoon", "evening"]).describe("The time the user wants to book the ski lessons."),
-        notes: z.string().describe("Any additional notes the user wants to add to the ski lesson booking."),
-    }
+  id: "ski_lessons",
+  title: "Book a Ski Lesson",
+  description:
+    "Book a personalized ski lesson from an alpine concierge. Use whenever a user mentions wanting to book, reserve, or plan ski lessons — solo, with a partner, or as a family. TONE: warm, knowledgeable, slightly upscale alpine concierge. React with genuine enthusiasm to what the user shares ('Chamonix in February — great call!', 'Love that your kids are ready to carve!'). Never feel like a form. Match the user's language.",
+  state: {
+    level: z
+      .enum(["beginner", "intermediate", "advanced", "expert"])
+      .describe(
+        "The skier's self-reported level. Infer from context when possible (e.g. 'first time on skis' → beginner, 'I ski blacks' → advanced).",
+      ),
+    groupSize: z
+      .number()
+      .int()
+      .min(1)
+      .max(12)
+      .describe(
+        "Number of people in the lesson. Infer from mentions of family members, couples, solo, etc. Defaults to 1 if the user is clearly alone.",
+      ),
+    date: z
+      .string()
+      .describe(
+        "The date of the lesson, in human-readable form (e.g. 'Saturday 14 Feb', 'next weekend', 'Feb 14'). Keep it the way the user said it.",
+      ),
+    time: z
+      .enum(["morning", "afternoon"])
+      .describe("Preferred time of day for the lesson."),
+    goals: z
+      .string()
+      .describe(
+        "What the skier wants to work on or get out of the lesson (e.g. 'work on carving', 'build confidence on reds', 'first time on snow'). Short sentence, user's words.",
+      ),
+    lessonPlan: z
+      .enum(["private", "small_group", "family"])
+      .describe(
+        "The lesson plan the user picked from the selector widget. Do NOT set this before the user clicks a plan or says which one they want.",
+      ),
+  },
 })
-    .addNode("welcome", async ({ interrupt }) => {
-        return interrupt({
-            level: {
-                question: "What is your ski level?",
-                context: "The user might not know their ski level, so you need to ask them. If they don't know, you can ask them to describe their skiing experience.",
-                suggestions: ["beginner", "intermediate", "advanced"],
+  // Step 1: open-ended welcome — extract as much as possible in one shot
+  .addNode("welcome", ({ interrupt }) => {
+    return interrupt({
+      goals: {
+        question: "Tell me about your ski trip — who's skiing and what are you hoping to work on?",
+        context: `This is the first message of a premium ski-school concierge experience. Greet the user warmly and ask ONE open-ended question — do NOT list fields, do NOT ask multiple questions in a row.
+
+Something like: "Welcome to Alpine School! I'd love to help you book a lesson. Tell me a bit about your trip — who's skiing, what level you're at, when you're there, and what you'd love to work on. Share as much or as little as you'd like :)"
+
+From the user's response, extract into stateUpdates whatever they naturally share:
+- level: "beginner" | "intermediate" | "advanced" | "expert" — infer from their words ("never skied" → beginner, "I ski blacks no problem" → advanced, "I can link turns on blues" → intermediate)
+- groupSize: number of people (couples → 2, "me and my two kids" → 3, solo → 1). Infer confidently.
+- date: the date as the user said it — keep it natural ("next Saturday", "Feb 14", "this weekend")
+- time: "morning" or "afternoon" if mentioned
+- goals: a short sentence describing what they want to work on, in the user's own words (e.g. "work on carving", "build confidence on reds", "first time on snow with the kids")
+
+Only extract fields the user clearly mentioned — do NOT guess. The next step will ask naturally for anything missing.`,
+      },
+    });
+  })
+
+  // Step 2: conversational follow-up for whatever's missing
+  .addNode("gather_details", ({ state, interrupt }) => {
+    return interrupt(
+      {
+        ...(!state.level
+          ? {
+              level: {
+                question: "What level would you say you're at?",
+                suggestions: ["beginner", "intermediate", "advanced", "expert"],
+              },
             }
-        })
-    })
-    .addNode("date_and_time", async ({ interrupt }) => {
-        return interrupt({
-            date: {
-                question: "What date do you want to book the ski lessons?",
-                suggestions: ["today", "tomorrow", "next week", "next month", "next year"],
-            },
-            time: {
-                question: "What time do you want to book the ski lessons?",
-            },
-        }, {
-            context: "The user might have a specific date in mind, so you need to ask them. If they don't have a specific date in mind, you can ask them to describe the date they want to book the ski lessons.",
-        })
-    })
-    .addNode("notes", async ({ interrupt }) => {
-        return interrupt({
-            notes: {
-                question: "Do you have any additional notes for the ski lesson booking?",
-            },
-        }, {
-            context: "The user might have a specific duration in mind, so you need to ask them. If they don't have a specific duration in mind, you can ask them to describe the duration they want to book the ski lessons.",
-        })
-    })
-    .addNode("confirmation", async ({ state, showWidget }) => {
-        return showWidget(
-            "show-ski-lesson-confirmation",
-            {
-                data: {
-                    level: state.level,
-                    date: state.date,
-                    time: state.time,
-                    notes: state.notes,
-                },
-                description: "The user has confirmed the ski lesson booking.",
-            })
-    })
-    .addEdge(START, "welcome")
-    .addEdge("welcome", "date_and_time")
-    .addEdge("date_and_time", "notes")
-    .addEdge("notes", "confirmation")
-    .addEdge("confirmation", END)
-    .compile();
+          : {}),
+        ...(!state.groupSize
+          ? {
+              groupSize: {
+                question: "How many people will be skiing?",
+              },
+            }
+          : {}),
+        ...(!state.date
+          ? {
+              date: {
+                question: "What day were you thinking?",
+              },
+            }
+          : {}),
+        ...(!state.time
+          ? {
+              time: {
+                question: "Morning or afternoon session?",
+                suggestions: ["morning", "afternoon"],
+              },
+            }
+          : {}),
+        ...(!state.goals
+          ? {
+              goals: {
+                question: "And what would you love to get out of the lesson?",
+              },
+            }
+          : {}),
+      },
+      {
+        context: `You're having a natural conversation — NOT filling out a form. React warmly to what the user shared in the welcome step before asking the next thing. Ask only ONE OR TWO of the missing questions at a time, weave them in conversationally.
+
+Good follow-ups:
+- "Chamonix next weekend — great pick! Who's skiing with you?"
+- "Got it, three of you. And are you all at a similar level, or mixed?"
+- "Love it! Morning or afternoon — when does the family usually get going?"
+
+FORMATTING: flowing prose, never bullet points or numbered lists. Each question should feel like part of a natural paragraph.`,
+      },
+    );
+  })
+
+  // Step 3: show the lesson plan picker widget
+  .addNode("show_lesson_plans", ({ state, showWidget }) => {
+    const plans = buildPlans(state.groupSize ?? 1, state.level ?? "intermediate");
+
+    return showWidget("select-lesson-plan", {
+      field: "lessonPlan",
+      description:
+        "The lesson plan selector is now on screen with three tailored options. Build a little excitement — something like 'Here are three options I picked out for you — take a look and tell me which feels right!' Do NOT re-list the plan details in text (the widget already shows them). Wait for the user to click a card or name a plan. When they do, set lessonPlan to 'private', 'small_group', or 'family' in stateUpdates.",
+      data: {
+        level: state.level,
+        groupSize: state.groupSize,
+        date: state.date,
+        time: state.time,
+        goals: state.goals,
+        plans,
+      },
+    });
+  })
+
+  // Step 4: confirm booking — generate resort details and show the ski pass
+  .addNode("confirm_booking", ({ state, showWidget }) => {
+    const seed = `${state.level}|${state.groupSize}|${state.date}|${state.time}|${state.lessonPlan}`;
+    const bookingRef = generateBookingRef(seed);
+    const instructor = pick(INSTRUCTORS, seed);
+    const meetingPoint = pick(MEETING_POINTS, seed + "m");
+    const weather = pick(WEATHER_FORECASTS, seed + "w");
+
+    const plans = buildPlans(state.groupSize ?? 1, state.level ?? "intermediate");
+    const selectedPlan = plans.find((p) => p.id === state.lessonPlan) ?? plans[0]!;
+
+    return showWidget("ski-pass-confirmation", {
+      description:
+        "The ski pass is now on screen. Celebrate briefly — something like 'You're all set! Your pass is ready above ☃️' — then wish them a great day on the mountain. Do NOT repeat any of the details; the pass already shows everything.",
+      data: {
+        bookingRef,
+        level: state.level,
+        groupSize: state.groupSize,
+        date: state.date,
+        time: state.time,
+        goals: state.goals,
+        lessonPlan: selectedPlan.name,
+        lessonTagline: selectedPlan.tagline,
+        durationMinutes: selectedPlan.durationMinutes,
+        priceEur: selectedPlan.priceEur,
+        instructor: instructor.name,
+        instructorStyle: instructor.style,
+        meetingPoint,
+        weather,
+      },
+    });
+  })
+
+  .addEdge(START, "welcome")
+  .addEdge("welcome", "gather_details")
+  .addEdge("gather_details", "show_lesson_plans")
+  .addEdge("show_lesson_plans", "confirm_booking")
+  .addEdge("confirm_booking", END)
+  .compile();

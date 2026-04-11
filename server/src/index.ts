@@ -5,23 +5,14 @@ import { z } from "zod";
 import "dotenv/config";
 import { skiLessonsFlow } from "./journey/index.js";
 
-const Answers = [
-  "As I see it, yes",
-  "Don't count on it",
-  "It is certain",
-  "It is decidedly so",
-  "Most likely",
-  "My reply is no",
-  "My sources say no",
-  "Outlook good",
-  "Outlook not so good",
-  "Signs point to yes",
-  "Very doubtful",
-  "Without a doubt",
-  "Yes definitely",
-  "Yes",
-  "You may rely on it",
-];
+const lessonPlanSchema = z.object({
+  id: z.enum(["private", "small_group", "family"]),
+  name: z.string(),
+  tagline: z.string(),
+  durationMinutes: z.number(),
+  priceEur: z.number(),
+  perks: z.array(z.string()),
+});
 
 const server = new McpServer(
   {
@@ -31,58 +22,80 @@ const server = new McpServer(
   { capabilities: {} },
 )
   .registerWidget(
-    "magic-8-ball",
+    "select-lesson-plan",
     {
-      description: "Magic 8 Ball",
+      description: "Show three curated ski lesson plans for the skier to pick from.",
     },
     {
-      description: "For fortune-telling or seeking advice.",
       inputSchema: {
-        question: z.string().describe("The user question."),
+        level: z.string().describe("The skier's level."),
+        groupSize: z.number().describe("How many people are skiing."),
+        date: z.string().describe("The lesson date."),
+        time: z.string().describe("Morning or afternoon."),
+        goals: z.string().describe("What the skier wants to work on."),
+        plans: z.array(lessonPlanSchema).describe("Three curated lesson plans."),
+      },
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+        destructiveHint: false,
       },
     },
-    async ({ question }) => {
-      try {
-        // deterministic answer
-        const hash = question
-          .split("")
-          .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const answer = Answers[hash % Answers.length];
-        return {
-          structuredContent: { answer },
-          content: [],
-          isError: false,
-        };
-      } catch (error) {
-        return {
-          content: [{ type: "text", text: `Error: ${error}` }],
-          isError: true,
-        };
-      }
+    async ({ level, groupSize, date, time, goals, plans }) => {
+      return {
+        structuredContent: { level, groupSize, date, time, goals, plans },
+        content: [
+          {
+            type: "text",
+            text: `Showing ${plans.length} lesson plan options.`,
+          },
+        ],
+        isError: false,
+      };
     },
   )
-  .registerWidget("show-ski-lesson-confirmation", {
-    description: "Show the ski lesson confirmation",
-  }, {
-    inputSchema: {
-      level: z.enum(["beginner", "intermediate", "advanced"]).describe("The user's ski level."),
-      date: z.enum(["today", "tomorrow", "next week", "next month", "next year"]).describe("The date the user wants to book the ski lessons."),
-      time: z.enum(["morning", "afternoon", "evening"]).describe("The time the user wants to book the ski lessons."),
-      notes: z.string().describe("Any additional notes the user wants to add to the ski lesson booking."),
+  .registerWidget(
+    "ski-pass-confirmation",
+    {
+      description: "Show the finalized ski pass confirmation card.",
     },
-  }, async ({ level, date, time, notes }) => {
-    return {
-      structuredContent: {
-        level,
-        date,
-        time,
-        notes,
+    {
+      inputSchema: {
+        bookingRef: z.string().describe("Booking reference code."),
+        level: z.string().describe("The skier's level."),
+        groupSize: z.number().describe("How many people are skiing."),
+        date: z.string().describe("Lesson date."),
+        time: z.string().describe("Morning or afternoon."),
+        goals: z.string().describe("What the skier wants to work on."),
+        lessonPlan: z.string().describe("The selected lesson plan name."),
+        lessonTagline: z.string().describe("The plan's tagline."),
+        durationMinutes: z.number().describe("Lesson duration in minutes."),
+        priceEur: z.number().describe("Price in euros."),
+        instructor: z.string().describe("Assigned instructor name."),
+        instructorStyle: z.string().describe("Short blurb about the instructor."),
+        meetingPoint: z.string().describe("Where to meet the instructor."),
+        weather: z.string().describe("Weather forecast line."),
       },
-      content: [{ type: "text", text: `Ski lesson confirmation: ${level} ${date} ${time} ${notes}` }],
-      isError: false,
-    };
-  })
-  .registerTool(skiLessonsFlow.name, skiLessonsFlow.config, skiLessonsFlow.handler)
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+        destructiveHint: false,
+      },
+    },
+    async (input) => {
+      return {
+        structuredContent: input,
+        content: [
+          {
+            type: "text",
+            text: `Booking ${input.bookingRef} confirmed — ${input.lessonPlan} with ${input.instructor} on ${input.date}.`,
+          },
+        ],
+        isError: false,
+      };
+    },
+  )
+  .registerTool(skiLessonsFlow.name, skiLessonsFlow.config, skiLessonsFlow.handler);
 
 withWaniwani(server, { client: waniwani() });
 
