@@ -108,12 +108,17 @@ const server = new McpServer(
     "debug_extra",
     { description: "Debug the extra object" },
     async (input: any, extra: any) => {
-      console.log("[debug] extra keys:", Object.keys(extra));
-      console.log("[debug] extra.sessionId:", typeof extra.sessionId, extra.sessionId);
-      console.log("[debug] extra._meta:", JSON.stringify(extra._meta));
-      console.log("[debug] extra.requestInfo:", JSON.stringify(extra.requestInfo, null, 2));
-      console.log("[debug] extra.requestInfo.headers:", JSON.stringify(extra.requestInfo.headers, null, 2));
-      console.log("[debug] input:", JSON.stringify(input, null, 2));
+      console.log("[debug] extra:", extra);
+      console.log("[debug] input:", input);
+
+      if (typeof extra === "object" && extra !== null) {
+        console.log("[debug] extra keys:", Object.keys(extra));
+        console.log("[debug] extra.sessionId:", typeof extra.sessionId, extra.sessionId);
+        console.log("[debug] extra._meta:", JSON.stringify(extra._meta));
+        console.log("[debug] extra.requestInfo:", JSON.stringify(extra.requestInfo, null, 2));
+        console.log("[debug] extra.requestInfo.headers:", JSON.stringify(extra.requestInfo.headers, null, 2));
+        console.log("[debug] input:", JSON.stringify(input, null, 2));
+      }
       return { content: [{ type: "text", text: JSON.stringify(Object.keys(extra)) }] };
     },
   );
