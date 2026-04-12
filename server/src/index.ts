@@ -119,7 +119,7 @@ const server = new McpServer(
         console.log("[debug] extra.requestInfo.headers:", JSON.stringify(extra.requestInfo.headers, null, 2));
         console.log("[debug] input:", JSON.stringify(input, null, 2));
       }
-      return { content: [{ type: "text", text: JSON.stringify(Object.keys(extra)) }] };
+      return { content: [{ type: "text", text: "Debug complete" }] };
     },
   );
 
