@@ -24,7 +24,7 @@ const server = new McpServer(
     "select-lesson-plan",
     {
       description:
-        "Show three curated ski lesson plans for the skier to pick from.",
+        "You MUST call this tool to display the lesson plan selector widget. It shows three curated ski lesson plans for the skier to pick from. The widget renders all plan details, prices, and perks — do NOT list or repeat them in text.",
     },
     {
       inputSchema: {
@@ -59,7 +59,7 @@ const server = new McpServer(
   .registerWidget(
     "ski-pass-confirmation",
     {
-      description: "Show the finalized ski pass confirmation card.",
+      description: "You MUST call this tool to display the finalized ski pass confirmation card. The widget renders the full booking details, QR code, instructor, meeting point, and weather — do NOT repeat any of these in text.",
     },
     {
       inputSchema: {

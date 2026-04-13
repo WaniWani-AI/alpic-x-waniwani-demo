@@ -204,7 +204,7 @@ FORMATTING: flowing prose, never bullet points or numbered lists. Each question 
 		return showWidget("select-lesson-plan", {
 			field: "lessonPlan",
 			description:
-				"The lesson plan selector is now on screen with three tailored options. Build a little excitement — something like 'Here are three options I picked out for you — take a look and tell me which feels right!' Do NOT re-list the plan details in text (the widget already shows them). Wait for the user to click a card or name a plan. When they do, set lessonPlan to 'private', 'small_group', or 'family' in stateUpdates.",
+				"IMPORTANT: You MUST now call the select-lesson-plan tool with the lesson data above to display the plan selector. Build a little excitement — something like 'Here are three options I picked out for you — take a look and tell me which feels right!' Then call select-lesson-plan immediately. The widget displays all the plan details, prices, and perks so do NOT list or repeat them yourself.\n\nPLAN NAMES: Always refer to plans by their display names (Private Masterclass, Small Group Workshop, Family Adventure), NEVER by their IDs ('private', 'small_group', 'family').\n\nWait for the user to click a card or name a plan. When they do, set lessonPlan to 'private', 'small_group', or 'family' in stateUpdates. Do NOT set lessonPlan before the user has made their choice.",
 			data: {
 				level: state.level,
 				groupSize: state.groupSize,
@@ -232,7 +232,7 @@ FORMATTING: flowing prose, never bullet points or numbered lists. Each question 
 			plans.find((p) => p.id === state.lessonPlan) ?? plans[0];
 
 		return showWidget("ski-pass-confirmation", {
-			description: `The ski pass is now on screen with a QR code the user can scan. Celebrate briefly — something like 'You're all set! Your pass is ready above ☃️' — then wish them a great day on the mountain. Do NOT repeat any of the details; the pass already shows everything.`,
+			description: `IMPORTANT: You MUST now call the ski-pass-confirmation tool with the booking data above to display the ski pass. Celebrate briefly — something like 'You're all set! Your pass is ready above ☃️' — then wish them a great day on the mountain. Then call ski-pass-confirmation immediately. The widget displays all booking details, QR code, instructor info, and meeting point so do NOT list or repeat any of them yourself.\n\nTONE: Keep it short and celebratory. One or two sentences max. The pass speaks for itself.`,
 			data: {
 				bookingRef,
 				level: state.level,
