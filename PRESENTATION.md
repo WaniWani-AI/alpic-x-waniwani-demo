@@ -1,11 +1,11 @@
 # Sell on LLMs: WaniWani SDK + Alpic
 
 > **Format**: 10-minute talk for Alpic developers, beginners to MCP / ChatGPT Apps
-> **Setup**: Have ChatGPT open with your deployed Alpine School connector ready
+> **Setup**: Have ChatGPT open with your deployed connector + your website embed + the Alpic dashboard ready
 
 ---
 
-## SLIDE 1 — Live Demo (0:00 - 1:30)
+## SLIDE 1 — Live Demo: ChatGPT (0:00 - 1:00)
 
 > No slides. Start with the demo. Open ChatGPT.
 
@@ -23,21 +23,31 @@ While the app responds conversationally and shows the lesson plan widget:
 
 Pick a plan. Let the ski pass confirmation appear.
 
-> "That's a booking confirmation — with an instructor, a meeting point, weather, a QR code. This whole experience? About 260 lines of code. Let me show you how."
+> "That's a booking confirmation — with an instructor, a meeting point, weather, a QR code."
 
 ---
 
-## SLIDE 2 — LLMs Are a New Channel (1:30 - 3:00)
+## SLIDE 2 — Same Code, Three Surfaces (1:00 - 2:30)
 
-**Key message:** LLMs are becoming a distribution channel for products and services — just like the web and mobile before them.
+**Key message:** You build it once — it works on ChatGPT, on your own website, and deployed on Alpic. Same codebase, multiple distribution channels.
+
+> Switch to the website embed tab.
 
 **Say:**
 
-> "People are already asking ChatGPT things like 'find me a ski lesson in Chamonix this weekend.' If your business isn't there, someone else is.
+> "Now — same experience, but this time on the ski school's own website."
+
+Show the same flow running embedded on a website.
+
+> "Same conversation, same widgets, same booking. No extra code."
+
+> Switch to the Alpic dashboard briefly.
+
+> "And this is the Alpic dashboard — where it's deployed and running in production. One `alpic deploy` and it's live on all these surfaces.
 >
-> This is the same shift we saw with websites, then apps, then marketplaces. LLMs are the next surface where people discover and buy things.
+> This is the point: you write the flow once, and it works wherever your customers are — on ChatGPT, on your own site, wherever. LLMs are a new distribution channel, just like the web and mobile before them. If your business isn't there, someone else is.
 >
-> But building for LLMs is different. You're not designing pages — you're designing conversations. And conversations need structure: what to ask, when to show a product, how to close a sale. That's what we built WaniWani for."
+> But building for LLMs is different. You're not designing pages — you're designing conversations. And conversations need structure: what to ask, when to show a product, how to close a sale. This whole experience? About 260 lines of code. Let me show you how."
 
 ---
 
@@ -190,17 +200,27 @@ server.run();
 
 ---
 
-## SLIDE 6 — Ship It with Alpic (8:30 - 9:15)
+## SLIDE 6 — Dev Experience: Alpic + Skybridge (8:30 - 9:15)
 
 **Say:**
 
-> "And because this is an Alpic app, shipping to production is:
+> "You saw it running in production earlier — let me quickly show you the dev side.
+>
+> Locally, it's three commands:
+>
+> ```
+> npm install
+> npm run dev
+> ngrok http 3000
+> ```
+>
+> You get hot reload on the widgets, Skybridge DevTools to test without even opening ChatGPT, and when you're ready to ship:
 >
 > ```
 > alpic deploy
 > ```
 >
-> One command. Your MCP is live, your widgets are hosted, and you can point ChatGPT at it from Settings > Connectors. For local dev, it's `npm run dev` plus ngrok — you get hot reload on the widgets and the Skybridge DevTools to test without even opening ChatGPT."
+> One command. Your MCP is live on ChatGPT, embeddable on your website — everywhere."
 
 ---
 
@@ -211,11 +231,12 @@ server.run();
 > "To recap:
 >
 > 1. LLMs are a new channel to sell your products and services
-> 2. WaniWani gets you discovered, keeps you compliant, and tracks your funnel
-> 3. The SDK is open source — define your state, your nodes, your widgets, and ship
-> 4. Alpic deploys it in one command
+> 2. You write the flow once — it works on ChatGPT, on your website, wherever your customers are
+> 3. WaniWani gets you discovered, keeps you compliant, and tracks your funnel end-to-end
+> 4. The SDK is open source with a generous free tier — define your state, your nodes, your widgets, and ship
+> 5. Alpic deploys it in one command
 >
-> The SDK has a generous free tier. This demo repo is public — clone it, run it, break it apart. The whole flow is 260 lines.
+> This demo repo is public — clone it, run it, break it apart. The whole flow is 260 lines.
 >
 > **Links to show:**
 > - This repo (the demo)
@@ -229,6 +250,8 @@ server.run();
 ## Prep Checklist
 
 - [ ] Confirm the deployed app works end-to-end in ChatGPT before going on stage
+- [ ] Confirm the website embed works (have the tab ready to switch to)
+- [ ] Have the Alpic dashboard open in a tab
 - [ ] Have the repo open in your editor, ready to show `server/src/journey/index.ts` and `server/src/index.ts`
 - [ ] Record a 30-second screen capture of the demo as a backup (in case WiFi or ChatGPT is slow)
 - [ ] Make sure your ChatGPT connector name is clean (not "test-123")
