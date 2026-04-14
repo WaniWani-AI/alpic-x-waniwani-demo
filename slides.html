@@ -157,7 +157,8 @@
   <p style="font-size: 1.1em; color: var(--wani-gray);">"My family is in Chamonix next weekend<br>and the kids are intermediate skiers"</p>
   <p class="subtitle">Switch to ChatGPT</p>
   <aside class="notes">
-    Switch to ChatGPT. Type the message. Show the lesson plan widget, pick a plan, show the ski pass. Don't explain yet — just show.
+    Switch to ChatGPT. Type the message. Show the lesson plan widget, pick a plan, show the ski pass.
+    Don't explain yet — just show. Then show the same thing on the website embed.
   </aside>
 </section>
 
@@ -180,7 +181,8 @@
   </div>
   <p class="subtitle" style="margin-top: 1.5em;">Same codebase. Same conversation. Same widgets.</p>
   <aside class="notes">
-    Show the website embed tab, then the Alpic dashboard briefly. "Same experience, no extra code."
+    "You just saw this on ChatGPT, then on the website. Same code, same flow, same widgets.
+    Alpic deploys it — one command and it's live everywhere."
   </aside>
 </section>
 
@@ -206,118 +208,20 @@
   </div>
 </section>
 
-<!-- ========== SLIDE 6: STATE ========== -->
+<!-- ========== SLIDE 6: LET'S LOOK AT THE CODE ========== -->
 <section>
-  <h2>1. Define your state</h2>
-  <pre><code class="language-typescript" data-trim data-noescape>
-export const skiLessonsFlow = createFlow({
-  id: "ski_lessons",
-  title: "Book a Ski Lesson",
-  state: {
-    level: z.enum(["beginner", "intermediate", "advanced", "expert"])
-      .describe("Infer from context: 'I ski blacks' → advanced"),
-    groupSize: z.number().int().min(1).max(12)
-      .describe("Infer from mentions of family, couples, solo..."),
-    date: z.string()
-      .describe("Keep it the way the user said it"),
-    time: z.enum(["morning", "afternoon"]),
-    goals: z.string()
-      .describe("What the skier wants to work on"),
-    lessonPlan: z.enum(["private", "small_group", "family"]),
-  },
-})
-  </code></pre>
-  <div class="highlight-box">
-    <p><code>.describe()</code> strings become extraction hints for the LLM</p>
-  </div>
+  <h2>How does it work?</h2>
+  <p style="font-size: 1em;">Let's look at the code.</p>
+  <p class="subtitle">Switch to editor</p>
+  <aside class="notes">
+    Switch to your editor with server/src/journey/index.ts open.
+    Walk through: state schema (Zod + .describe), welcome node (interrupt),
+    gather_details (conditional asks), show_lesson_plans (showWidget),
+    edges (START → END), then index.ts for withWaniwani.
+  </aside>
 </section>
 
-<!-- ========== SLIDE 7: INTERRUPT ========== -->
-<section>
-  <h2>2. Ask naturally with <code>interrupt</code></h2>
-  <pre><code class="language-typescript" data-trim data-noescape>
-.addNode("welcome", ({ interrupt }) => {
-  return interrupt({
-    goals: {
-      question: "Tell me about your ski trip!",
-      context: `Greet warmly. Ask ONE open-ended question.
-        Extract whatever they naturally share into state.`
-    },
-  });
-})
-
-.addNode("gather_details", ({ state, interrupt }) => {
-  return interrupt({
-    // Only asks for what's still missing
-    ...(!state.level   ? { level:     { question: "What level?" } } : {}),
-    ...(!state.date    ? { date:      { question: "What day?"   } } : {}),
-    ...(!state.groupSize ? { groupSize: { question: "How many?"  } } : {}),
-  });
-})
-  </code></pre>
-  <div class="highlight-box">
-    <p>Conversational, not a form. Skips what's already known.</p>
-  </div>
-</section>
-
-<!-- ========== SLIDE 8: SHOW WIDGET ========== -->
-<section>
-  <h2>3. Show rich UI with <code>showWidget</code></h2>
-  <pre><code class="language-typescript" data-trim data-noescape>
-.addNode("show_lesson_plans", ({ state, showWidget }) => {
-  const plans = buildPlans(state.groupSize, state.level);
-
-  return showWidget("select-lesson-plan", {
-    field: "lessonPlan",
-    data: {
-      level: state.level,
-      groupSize: state.groupSize,
-      date: state.date,
-      plans,
-    },
-  });
-})
-  </code></pre>
-  <div class="highlight-box">
-    <p>User taps a card &rarr; choice flows back into state automatically</p>
-  </div>
-</section>
-
-<!-- ========== SLIDE 9: EDGES ========== -->
-<section>
-  <h2>4. Wire it up</h2>
-  <pre><code class="language-typescript" data-trim data-noescape>
-  .addEdge(START, "welcome")
-  .addEdge("welcome", "gather_details")
-  .addEdge("gather_details", "show_lesson_plans")
-  .addEdge("show_lesson_plans", "confirm_booking")
-  .addEdge("confirm_booking", END)
-  .compile();
-  </code></pre>
-  <p style="margin-top: 1em;">Reads like a flow diagram &mdash; because it is one.</p>
-  <p class="subtitle"><code>.compile()</code> turns it into a single MCP tool</p>
-</section>
-
-<!-- ========== SLIDE 10: PLUG IT IN ========== -->
-<section>
-  <h2>Connect to the platform</h2>
-  <pre><code class="language-typescript" data-trim data-noescape>
-server.registerTool(
-  skiLessonsFlow.name,
-  skiLessonsFlow.config,
-  skiLessonsFlow.handler,
-);
-
-withWaniwani(server, { client: waniwani() });
-
-server.run();
-  </code></pre>
-  <div class="highlight-box">
-    <p><code>withWaniwani</code> &rarr; discovery + compliance + funnel tracking</p>
-  </div>
-</section>
-
-<!-- ========== SLIDE 11: DEV + DEPLOY ========== -->
+<!-- ========== SLIDE 7: DEV + DEPLOY ========== -->
 <section>
   <h2>Dev &amp; Deploy</h2>
   <div class="columns" style="align-items: start;">
@@ -336,7 +240,7 @@ server.run();
   </div>
 </section>
 
-<!-- ========== SLIDE 12: GET STARTED ========== -->
+<!-- ========== SLIDE 8: GET STARTED ========== -->
 <section>
   <h2>Get started</h2>
   <div class="big-number">260</div>
