@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WaniWani: Enabling MCP as a Distribution Channel</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<style>
+  :root {
+    --wani-purple: #8b5cf6;
+    --wani-blue: #3b82f6;
+    --wani-dark: #0f172a;
+    --wani-gray: #94a3b8;
+  }
+  .reveal {
+    font-family: "Inter", "SF Pro Display", -apple-system, sans-serif;
+  }
+  .reveal h1, .reveal h2, .reveal h3 {
+    text-transform: none;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .reveal h1 { font-size: 2.4em; }
+  .reveal h2 { font-size: 1.6em; }
+  .reveal h3 { font-size: 1.1em; color: var(--wani-purple); font-weight: 600; }
+  .reveal p, .reveal li { font-size: 0.75em; line-height: 1.6; }
+  .reveal .subtitle {
+    color: var(--wani-gray);
+    font-size: 0.65em;
+    margin-top: 0.5em;
+  }
+  .reveal .brand {
+    color: var(--wani-purple);
+  }
+  .reveal .pill {
+    display: inline-block;
+    background: var(--wani-purple);
+    color: white;
+    padding: 0.15em 0.6em;
+    border-radius: 999px;
+    font-size: 0.65em;
+    font-weight: 600;
+    margin: 0.15em;
+  }
+  .reveal .columns {
+    display: flex;
+    gap: 2em;
+    text-align: left;
+    margin-top: 1em;
+  }
+  .reveal .columns .col {
+    flex: 1;
+  }
+  .reveal .col h3 {
+    margin-bottom: 0.3em;
+  }
+  .reveal .col p {
+    font-size: 0.6em;
+    color: var(--wani-gray);
+  }
+  .reveal pre {
+    font-size: 0.48em;
+    width: 100%;
+    box-shadow: none;
+  }
+  .reveal pre code {
+    max-height: 520px;
+    border-radius: 8px;
+    padding: 1em;
+  }
+  .reveal .speaker-note {
+    display: none;
+  }
+  .reveal .video-placeholder {
+    border: 2px dashed var(--wani-gray);
+    border-radius: 12px;
+    padding: 3em 2em;
+    margin: 1em auto;
+    max-width: 700px;
+    color: var(--wani-gray);
+    font-size: 0.6em;
+  }
+  .reveal .highlight-box {
+    background: rgba(139, 92, 246, 0.12);
+    border-left: 4px solid var(--wani-purple);
+    padding: 0.6em 1em;
+    border-radius: 0 8px 8px 0;
+    text-align: left;
+    margin: 0.8em 0;
+  }
+  .reveal .highlight-box p {
+    margin: 0;
+    font-size: 0.65em;
+  }
+  .reveal .cmd {
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    background: rgba(255,255,255,0.08);
+    padding: 0.5em 1em;
+    border-radius: 8px;
+    font-size: 0.7em;
+    display: inline-block;
+    margin: 0.3em 0;
+  }
+  .reveal .links {
+    text-align: left;
+    margin: 1em auto;
+    max-width: 500px;
+  }
+  .reveal .links a {
+    display: block;
+    color: var(--wani-purple);
+    font-size: 0.7em;
+    margin: 0.4em 0;
+    text-decoration: none;
+  }
+  .reveal .links a:hover {
+    text-decoration: underline;
+  }
+  .reveal .big-number {
+    font-size: 3em;
+    font-weight: 800;
+    color: var(--wani-purple);
+    line-height: 1;
+  }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ========== SLIDE 1: TITLE ========== -->
+<section>
+  <h1><span class="brand">WaniWani</span></h1>
+  <h2 style="font-weight: 400; font-size: 1.2em;">Enabling MCP as a Distribution Channel</h2>
+  <p class="subtitle">with Alpic</p>
+</section>
+
+<!-- ========== SLIDE 2: WHAT DOES IT MEAN? ========== -->
+<section>
+  <h2>What does it mean?</h2>
+  <div class="video-placeholder">
+    <!-- Replace this div with: <video src="tuio-demo.mp4" controls></video> -->
+    Video: Tuio &mdash; an insurance company selling through the ChatGPT App Store
+  </div>
+  <p class="subtitle">People are already buying products and services inside LLMs.</p>
+  <aside class="notes">
+    Play the Tuio video. Let it speak for itself.
+    Then: "This is an insurance company — selling policies through ChatGPT. This is happening now."
+  </aside>
+</section>
+
+<!-- ========== SLIDE 3: LIVE DEMO ========== -->
+<section>
+  <h2>Live Demo</h2>
+  <p style="font-size: 1.1em; color: var(--wani-gray);">"My family is in Chamonix next weekend<br>and the kids are intermediate skiers"</p>
+  <p class="subtitle">Switch to ChatGPT</p>
+  <aside class="notes">
+    Switch to ChatGPT. Type the message. Show the lesson plan widget, pick a plan, show the ski pass. Don't explain yet — just show.
+  </aside>
+</section>
+
+<!-- ========== SLIDE 4: BUILD ONCE, RUN EVERYWHERE ========== -->
+<section>
+  <h2>Build once, run everywhere</h2>
+  <div class="columns">
+    <div class="col">
+      <h3>ChatGPT</h3>
+      <p>App Store &amp; Connectors</p>
+    </div>
+    <div class="col">
+      <h3>Your Website</h3>
+      <p>Embedded widget</p>
+    </div>
+    <div class="col">
+      <h3>Alpic</h3>
+      <p>One-command deploy</p>
+    </div>
+  </div>
+  <p class="subtitle" style="margin-top: 1.5em;">Same codebase. Same conversation. Same widgets.</p>
+  <aside class="notes">
+    Show the website embed tab, then the Alpic dashboard briefly. "Same experience, no extra code."
+  </aside>
+</section>
+
+<!-- ========== SLIDE 5: WHAT WANIWANI DOES ========== -->
+<section>
+  <h2>What <span class="brand">WaniWani</span> does</h2>
+  <div class="columns">
+    <div class="col">
+      <h3>Discovery</h3>
+      <p>Get your brand and MCP found on ChatGPT &amp; other LLMs</p>
+    </div>
+    <div class="col">
+      <h3>Compliance</h3>
+      <p>Stay legal when selling products &amp; services via MCP</p>
+    </div>
+    <div class="col">
+      <h3>Funnel Tracking</h3>
+      <p>End-to-end analytics inside the LLM conversation</p>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top: 1.5em;">
+    <p>The SDK is open source &mdash; it's how you build the conversational experience.</p>
+  </div>
+</section>
+
+<!-- ========== SLIDE 6: STATE ========== -->
+<section>
+  <h2>1. Define your state</h2>
+  <pre><code class="language-typescript" data-trim data-noescape>
+export const skiLessonsFlow = createFlow({
+  id: "ski_lessons",
+  title: "Book a Ski Lesson",
+  state: {
+    level: z.enum(["beginner", "intermediate", "advanced", "expert"])
+      .describe("Infer from context: 'I ski blacks' → advanced"),
+    groupSize: z.number().int().min(1).max(12)
+      .describe("Infer from mentions of family, couples, solo..."),
+    date: z.string()
+      .describe("Keep it the way the user said it"),
+    time: z.enum(["morning", "afternoon"]),
+    goals: z.string()
+      .describe("What the skier wants to work on"),
+    lessonPlan: z.enum(["private", "small_group", "family"]),
+  },
+})
+  </code></pre>
+  <div class="highlight-box">
+    <p><code>.describe()</code> strings become extraction hints for the LLM</p>
+  </div>
+</section>
+
+<!-- ========== SLIDE 7: INTERRUPT ========== -->
+<section>
+  <h2>2. Ask naturally with <code>interrupt</code></h2>
+  <pre><code class="language-typescript" data-trim data-noescape>
+.addNode("welcome", ({ interrupt }) => {
+  return interrupt({
+    goals: {
+      question: "Tell me about your ski trip!",
+      context: `Greet warmly. Ask ONE open-ended question.
+        Extract whatever they naturally share into state.`
+    },
+  });
+})
+
+.addNode("gather_details", ({ state, interrupt }) => {
+  return interrupt({
+    // Only asks for what's still missing
+    ...(!state.level   ? { level:     { question: "What level?" } } : {}),
+    ...(!state.date    ? { date:      { question: "What day?"   } } : {}),
+    ...(!state.groupSize ? { groupSize: { question: "How many?"  } } : {}),
+  });
+})
+  </code></pre>
+  <div class="highlight-box">
+    <p>Conversational, not a form. Skips what's already known.</p>
+  </div>
+</section>
+
+<!-- ========== SLIDE 8: SHOW WIDGET ========== -->
+<section>
+  <h2>3. Show rich UI with <code>showWidget</code></h2>
+  <pre><code class="language-typescript" data-trim data-noescape>
+.addNode("show_lesson_plans", ({ state, showWidget }) => {
+  const plans = buildPlans(state.groupSize, state.level);
+
+  return showWidget("select-lesson-plan", {
+    field: "lessonPlan",
+    data: {
+      level: state.level,
+      groupSize: state.groupSize,
+      date: state.date,
+      plans,
+    },
+  });
+})
+  </code></pre>
+  <div class="highlight-box">
+    <p>User taps a card &rarr; choice flows back into state automatically</p>
+  </div>
+</section>
+
+<!-- ========== SLIDE 9: EDGES ========== -->
+<section>
+  <h2>4. Wire it up</h2>
+  <pre><code class="language-typescript" data-trim data-noescape>
+  .addEdge(START, "welcome")
+  .addEdge("welcome", "gather_details")
+  .addEdge("gather_details", "show_lesson_plans")
+  .addEdge("show_lesson_plans", "confirm_booking")
+  .addEdge("confirm_booking", END)
+  .compile();
+  </code></pre>
+  <p style="margin-top: 1em;">Reads like a flow diagram &mdash; because it is one.</p>
+  <p class="subtitle"><code>.compile()</code> turns it into a single MCP tool</p>
+</section>
+
+<!-- ========== SLIDE 10: PLUG IT IN ========== -->
+<section>
+  <h2>Connect to the platform</h2>
+  <pre><code class="language-typescript" data-trim data-noescape>
+server.registerTool(
+  skiLessonsFlow.name,
+  skiLessonsFlow.config,
+  skiLessonsFlow.handler,
+);
+
+withWaniwani(server, { client: waniwani() });
+
+server.run();
+  </code></pre>
+  <div class="highlight-box">
+    <p><code>withWaniwani</code> &rarr; discovery + compliance + funnel tracking</p>
+  </div>
+</section>
+
+<!-- ========== SLIDE 11: DEV + DEPLOY ========== -->
+<section>
+  <h2>Dev &amp; Deploy</h2>
+  <div class="columns" style="align-items: start;">
+    <div class="col">
+      <h3>Develop</h3>
+      <div class="cmd">npm install</div><br>
+      <div class="cmd">npm run dev</div><br>
+      <div class="cmd">ngrok http 3000</div>
+      <p style="margin-top: 0.8em;">Hot reload + Skybridge DevTools</p>
+    </div>
+    <div class="col">
+      <h3>Ship</h3>
+      <div class="cmd">alpic deploy</div>
+      <p style="margin-top: 0.8em;">Live on ChatGPT, your website, everywhere.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SLIDE 12: GET STARTED ========== -->
+<section>
+  <h2>Get started</h2>
+  <div class="big-number">260</div>
+  <p>lines of code for the entire flow</p>
+  <div style="margin-top: 1em;">
+    <span class="pill">Open Source SDK</span>
+    <span class="pill">Generous Free Tier</span>
+    <span class="pill">One-Command Deploy</span>
+  </div>
+  <div class="links" style="margin-top: 1.5em; text-align: center;">
+    <a href="https://waniwani.ai">waniwani.ai</a>
+    <a href="https://alpic.ai">alpic.ai</a>
+    <a href="https://github.com/waniwani-ai/alpic-x-waniwani-demo">This demo repo</a>
+  </div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  controls: true,
+  progress: true,
+  center: true,
+  transition: "slide",
+  plugins: [RevealHighlight, RevealNotes],
+});
+</script>
+</body>
+</html>
