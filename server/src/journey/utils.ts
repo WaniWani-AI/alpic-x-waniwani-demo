@@ -28,3 +28,15 @@ export function pick<T>(list: T[], seed: string): T {
 	const hash = seed.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
 	return list[hash % list.length];
 }
+
+export function generateBookingRef(seed: string): string {
+	const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+	let hash = seed.split("").reduce((a, c) => a + c.charCodeAt(0) * 31, 7);
+	let ref = "";
+	for (let i = 0; i < 4; i++) {
+		ref += alphabet[hash % alphabet.length];
+		hash =
+			Math.floor(hash / alphabet.length) + seed.charCodeAt(i % seed.length);
+	}
+	return `SKI-${ref}`;
+}

@@ -1,23 +1,12 @@
 import { createFlow, END, START } from "@waniwani/sdk/mcp";
 import { z } from "zod";
 import {
+	generateBookingRef,
 	INSTRUCTORS,
 	MEETING_POINTS,
 	pick,
 	WEATHER_FORECASTS,
 } from "./utils.js";
-
-function generateBookingRef(seed: string): string {
-	const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-	let hash = seed.split("").reduce((a, c) => a + c.charCodeAt(0) * 31, 7);
-	let ref = "";
-	for (let i = 0; i < 4; i++) {
-		ref += alphabet[hash % alphabet.length];
-		hash =
-			Math.floor(hash / alphabet.length) + seed.charCodeAt(i % seed.length);
-	}
-	return `SKI-${ref}`;
-}
 
 // ---------- Lesson plan catalog ----------
 
