@@ -1,6 +1,8 @@
 node_modules/
 dist/
+public/assets/
 .env*
 !.env.example
 .DS_store
 *.tsbuildinfo
+.vercel
