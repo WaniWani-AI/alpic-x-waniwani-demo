@@ -9,7 +9,7 @@ app.use(express.json());
 app.post("/mcp", async (req, res, next) => {
 	try {
 		const transport = new StreamableHTTPServerTransport({
-			sessionIdGenerator: undefined,
+			sessionIdGenerator: () => crypto.randomUUID(),
 		});
 		res.on("close", () => {
 			transport.close();
