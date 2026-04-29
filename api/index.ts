@@ -33,6 +33,7 @@ app.post("/mcp", async (req, res, next) => {
 		req.url = req.originalUrl;
 		await transport.handleRequest(req, res, req.body);
 	} catch (error) {
+		console.error("ERROR HANDLING MCP REQUEST", error);
 		next(error);
 	}
 });
