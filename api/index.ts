@@ -21,10 +21,15 @@ app.use(express.json());
 
 app.post("/mcp", async (req, res, next) => {
 	try {
+
+		console.log("HEADERS ARE", req.headers);
+
 		// Use Mcp-Session-Id if the client sends it (spec-compliant clients).
 		// Otherwise derive a stable ID from request fingerprint (for Claude.ai).
 		const incomingSessionId = req.headers["mcp-session-id"] as string | undefined;
 		const sessionId = incomingSessionId || deriveSessionId(req);
+
+		console.log("SESSION ID IS", sessionId);
 
 		// Use sessionIdGenerator: undefined to skip session validation entirely
 		// (in serverless each request is a fresh transport, so validation always fails).
