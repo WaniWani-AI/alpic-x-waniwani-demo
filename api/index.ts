@@ -8,14 +8,20 @@ app.use(express.json());
 
 app.post("/mcp", async (req, res, next) => {
 	try {
-		// In serverless, each request gets a fresh transport. To maintain session
-		// continuity for multi-step flows, we reuse the incoming session ID if the
-		// client sends one back, or generate a new one on first contact.
 		const incomingSessionId = req.headers["mcp-session-id"] as string | undefined;
+		const sessionId = incomingSessionId || crypto.randomUUID();
 
+		// Use sessionIdGenerator: undefined to skip session validation entirely
+		// (in serverless each request is a fresh transport, so validation always fails).
+		// Then manually inject the session ID so that:
+		//   1. extra.sessionId is populated for tool handlers (WaniWani flows need it)
+		//   2. Mcp-Session-Id header is included in responses (so clients send it back)
 		const transport = new StreamableHTTPServerTransport({
-			sessionIdGenerator: () => incomingSessionId || crypto.randomUUID(),
+			sessionIdGenerator: undefined,
 		});
+		// biome-ignore lint/suspicious/noExplicitAny: accessing internal to inject session ID in serverless context
+		(transport as any)._webStandardTransport.sessionId = sessionId;
+
 		res.on("close", () => {
 			transport.close();
 		});
