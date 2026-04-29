@@ -1,19 +1,30 @@
 import "dotenv/config";
+import crypto from "node:crypto";
 import express from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { server } from "../server/src/app.js";
+
+/**
+ * Derive a stable session ID for MCP clients that don't send back Mcp-Session-Id.
+ * Claude.ai's proxy strips session headers, so we fall back to a deterministic
+ * hash of the client IP + user-agent. This gives a stable ID per-client.
+ * Proper MCP clients (Claude Code, MCP Tool Jam) send the header and bypass this.
+ */
+function deriveSessionId(req: express.Request): string {
+	const ip = req.headers["x-real-ip"] || req.headers["x-forwarded-for"] || "unknown";
+	const ua = req.headers["user-agent"] || "unknown";
+	return crypto.createHash("sha256").update(`${ip}:${ua}`).digest("hex").slice(0, 32);
+}
 
 const app = express();
 app.use(express.json());
 
 app.post("/mcp", async (req, res, next) => {
 	try {
+		// Use Mcp-Session-Id if the client sends it (spec-compliant clients).
+		// Otherwise derive a stable ID from request fingerprint (for Claude.ai).
 		const incomingSessionId = req.headers["mcp-session-id"] as string | undefined;
-		const sessionId = incomingSessionId || crypto.randomUUID();
-
-		console.log("INCOMING SESSION ID IS", incomingSessionId);
-		console.log("HEADERS ARE", req.headers);
-		console.log("REQUEST BODY", JSON.stringify(req.body, null, 2));
+		const sessionId = incomingSessionId || deriveSessionId(req);
 
 		// Use sessionIdGenerator: undefined to skip session validation entirely
 		// (in serverless each request is a fresh transport, so validation always fails).
