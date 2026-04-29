@@ -14,6 +14,8 @@ app.post("/mcp", async (req, res, next) => {
 		const incomingSessionId =
 			(req.headers["mcp-session-id"] as string) ||
 			(req.headers["x-waniwani-session-id"] as string);
+
+		console.log("INCOMING SESSION ID IS", incomingSessionId);
 		const sessionId = incomingSessionId || crypto.randomUUID();
 
 		const transport = new StreamableHTTPServerTransport({
@@ -22,6 +24,7 @@ app.post("/mcp", async (req, res, next) => {
 		res.on("close", () => {
 			transport.close();
 		});
+		console.log("YOUR SESSION ID IS", sessionId);
 		// Echo session ID back on both headers so the client and SDK can pick it up
 		res.setHeader("Mcp-Session-Id", sessionId);
 		res.setHeader("X-Waniwani-Session-Id", sessionId);
