@@ -8,32 +8,21 @@ app.use(express.json());
 
 app.post("/mcp", async (req, res, next) => {
 	try {
-		// Stateless session management: reuse incoming session ID or generate a new one.
-		// Transport's own session validation is disabled (serverless = no shared state),
-		// so we handle the header manually.
-		const incomingSessionId =
-			(req.headers["mcp-session-id"] as string) ||
-			(req.headers["x-waniwani-session-id"] as string);
-
-		console.log("INCOMING SESSION ID IS", incomingSessionId);
-		console.log("REQUEST HEADERS ARE", req.headers);
-		const sessionId = incomingSessionId || crypto.randomUUID();
+		// In serverless, each request gets a fresh transport. To maintain session
+		// continuity for multi-step flows, we reuse the incoming session ID if the
+		// client sends one back, or generate a new one on first contact.
+		const incomingSessionId = req.headers["mcp-session-id"] as string | undefined;
 
 		const transport = new StreamableHTTPServerTransport({
-			sessionIdGenerator: undefined,
+			sessionIdGenerator: () => incomingSessionId || crypto.randomUUID(),
 		});
 		res.on("close", () => {
 			transport.close();
 		});
-		console.log("YOUR SESSION ID IS", sessionId);
-		// Echo session ID back on both headers so the client and SDK can pick it up
-		res.setHeader("Mcp-Session-Id", sessionId);
-		res.setHeader("X-Waniwani-Session-Id", sessionId);
 		await server.connect(transport);
 		req.url = req.originalUrl;
 		await transport.handleRequest(req, res, req.body);
 	} catch (error) {
-		console.error("ERROR HANDLING MCP REQUEST", error);
 		next(error);
 	}
 });
