@@ -20,7 +20,7 @@ app.post("/mcp", async (req, res, next) => {
 		const sessionId = incomingSessionId || crypto.randomUUID();
 
 		const transport = new StreamableHTTPServerTransport({
-			sessionIdGenerator: () => sessionId,
+			sessionIdGenerator: undefined,
 		});
 		res.on("close", () => {
 			transport.close();
