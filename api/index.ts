@@ -16,10 +16,11 @@ app.post("/mcp", async (req, res, next) => {
 			(req.headers["x-waniwani-session-id"] as string);
 
 		console.log("INCOMING SESSION ID IS", incomingSessionId);
+		console.log("REQUEST HEADERS ARE", req.headers);
 		const sessionId = incomingSessionId || crypto.randomUUID();
 
 		const transport = new StreamableHTTPServerTransport({
-			sessionIdGenerator: undefined,
+			sessionIdGenerator: () => sessionId,
 		});
 		res.on("close", () => {
 			transport.close();
