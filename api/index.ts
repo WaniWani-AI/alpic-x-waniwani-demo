@@ -13,6 +13,7 @@ app.post("/mcp", async (req, res, next) => {
 
 		console.log("INCOMING SESSION ID IS", incomingSessionId);
 		console.log("HEADERS ARE", req.headers);
+		console.log("REQUEST BODY", JSON.stringify(req.body, null, 2));
 
 		// Use sessionIdGenerator: undefined to skip session validation entirely
 		// (in serverless each request is a fresh transport, so validation always fails).
